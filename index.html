@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>طراحی و ترسیم دیاگرام الکتروموتور</title>
 <style>
 :root{--bg:#f3f5fa;--fg:#161a22;--mut:#5b6577;--card:#fff;--bd:#d5dbe7;--ac:#2563eb;--st:#eaeef6;--fld:#f4f6fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}}
 :root[data-theme="dark"]{--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 Tahoma,system-ui,sans-serif;padding:14px}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 'Vazirmatn',Tahoma,system-ui,sans-serif;padding:14px}
 .wrap{max-width:1200px;margin:0 auto}
 h1{font-size:20px;font-weight:700;margin:4px 0 16px;text-align:center}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
@@ -179,7 +180,7 @@ for(const c of coils.filter(c=>vis(c.p))){const gm=GM[c.p+','+c.k],dd=two?.13:0,
     let ok=sg.filter(g=>g[1]-g[0]>=40);if(!ok.length){const best=sg.slice().sort((u,v)=>(v[1]-v[0])-(u[1]-u[0]))[0];if(best&&best[1]-best[0]>=24)ok=[best]}
     ok.forEach(g=>{const m=(g[0]+g[1])/2;s+=`<polygon points="${m-6*dr},${yl-4.5} ${m-6*dr},${yl+4.5} ${m+6*dr},${yl}" fill="${col[l.p]}"/>`})}});
   names.forEach((n,p)=>{if(!ends[p])return;[[ends[p][0],n[0],0],[ends[p][1],n[1],1]].forEach(([i,t,e])=>{const ax=X(i),ay=ly-13;s+=`<line x1="${ax}" y1="${Y}" x2="${ax}" y2="${ly}" stroke="${col[p]}" stroke-width="1.8" stroke-linecap="round"/><polygon points="${e?`${ax-4.5},${ay-5} ${ax+4.5},${ay-5} ${ax},${ay+5}`:`${ax-4.5},${ay+5} ${ax+4.5},${ay+5} ${ax},${ay-5}`}" fill="${col[p]}"/><text x="${ax}" y="${ly+22}" text-anchor="middle" font-size="16" font-weight="bold" fill="${col[p]}">${t}</text>`})});s+=hp.join('')}
- st.h=H;st.w=W;$('map').innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Tahoma,sans-serif">`+s+'</svg>';
+ st.h=H;st.w=W;$('map').innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Vazirmatn,Tahoma,sans-serif">`+s+'</svg>';
  $('vis').innerHTML='<b>نمایش سیم‌پیچ‌ها</b>'+nm.slice(0,ph==3?3:2).map((n,p)=>`<label class="chk"><input type="checkbox" data-p="${p}" ${hid.has(p)?'':'checked'}><span class="dot" style="background:${col[p]}"></span>${n}</label>`).join('');$('vis').style.display='';
  const leg=nm.slice(0,ph==3?3:2).map((n,i)=>`<span class="dot" style="background:${col[i]}"></span>${n}`).join(' &nbsp; ');
  const cn=p=>coils.filter(c=>c.p==p).length,ipl=[['تعداد شیار',S],['قطب',P],['تعداد کلاف‌ها',coils.length]].concat(ph==3?[['تعداد کلاف هر فاز',cn(0)]]:[['کلاف اصلی',cn(0)+' تا'],['کلاف کمکی',cn(1)+' تا']],[['فاصله محوری',fa(Math.floor(ph==3?spp*2/3:spp/2))+' شیار']]);
@@ -249,19 +250,20 @@ async function pdf(){
  const dl=window.claude?await claude.use('downloads'):null;
  if(!dl){alert('ذخیره‌ی فایل در این نمایش ممکن نیست.');draw(was);return}
  try{
+  try{await Promise.all([document.fonts.load('18px Vazirmatn'),document.fonts.load('bold 26px Vazirmatn')])}catch(_){}
   const{P,S,spp,coils,pitch}=st,k=Math.min(2,12000/Math.max(st.w,900));
   const svg=$('map').innerHTML.replace(/var\(--st\)/g,'#eef0f3').replace(/var\(--bd\)/g,'#999').replace(/var\(--fg\)/g,'#000');
   const img=new Image();await new Promise((r,j)=>{img.onload=r;img.onerror=j;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
   const W=st.w,CW=Math.max(W,900),cv=document.createElement('canvas'),c=cv.getContext('2d');
   const info=st.ip;
   const tx=$('conn').innerText.split('\n').map(s=>s.trim()).filter(Boolean);
-  c.font='18px Tahoma, sans-serif';
+  c.font='18px Vazirmatn, Tahoma, sans-serif';
   const Li=wrap(c,info,CW-40),Lc=[].concat(...tx.map(t=>wrap(c,t,CW-40)));
   const yd=60+Li.length*26+10,CH=yd+st.h+20+Lc.length*24+20;
   cv.width=CW*k;cv.height=CH*k;const g=cv.getContext('2d');
   g.scale(k,k);g.fillStyle='#fff';g.fillRect(0,0,CW,CH);g.fillStyle='#000';g.direction='rtl';g.textAlign='right';
-  g.font='bold 26px Tahoma, sans-serif';g.fillText('طراحی و ترسیم دیاگرام الکتروموتور',CW-20,40);
-  g.font='18px Tahoma, sans-serif';Li.forEach((t,i)=>g.fillText(t,CW-20,80+i*26));
+  g.font='bold 26px Vazirmatn, Tahoma, sans-serif';g.fillText('طراحی و ترسیم دیاگرام الکتروموتور',CW-20,40);
+  g.font='18px Vazirmatn, Tahoma, sans-serif';Li.forEach((t,i)=>g.fillText(t,CW-20,80+i*26));
   g.drawImage(img,(CW-W)/2,yd,W,st.h);
   Lc.forEach((t,i)=>g.fillText(t,CW-20,yd+st.h+40+i*24));
   const b=atob(cv.toDataURL('image/jpeg',0.92).split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
