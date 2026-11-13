@@ -5,11 +5,10 @@
 <title>طراحی و ترسیم دیاگرام الکتروموتور</title>
 <style>
 :root{--bg:#f3f5fa;--fg:#161a22;--mut:#5b6577;--card:#fff;--bd:#d5dbe7;--ac:#2563eb;--st:#eaeef6;--fld:#f4f6fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}}
 :root[data-theme="dark"]{--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 'Vazirmatn',Tahoma,system-ui,sans-serif;padding:14px}
-.wrap{max-width:1200px;margin:0 auto}
+.wrap{max-width:1200px;margin:0 auto;position:relative}
 h1{font-size:20px;font-weight:700;margin:4px 0 16px;text-align:center}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -47,8 +46,11 @@ button.sm{padding:5px 12px;border-radius:10px}
 #info:empty,#map:empty{display:none}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:4px}
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
+.theme{position:absolute;top:2px;left:0;width:36px;height:36px;padding:0;border-radius:50%;background:var(--st);color:var(--fg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex:none}
+.theme svg{width:20px;height:20px}
 </style></head><body>
 <main class="wrap">
+<button id="theme" class="theme" type="button" aria-label="تغییر تم"></button>
 <h1>طراحی و ترسیم دیاگرام الکتروموتور</h1>
 <section class="card">
  <div class="grid">
@@ -191,6 +193,7 @@ for(const c of coils.filter(c=>vis(c.p))){const gm=GM[c.p+','+c.k],dd=two?.13:0,
  $('info').innerHTML=ipl.map(([l,v])=>l+': <b>'+v+'</b>').join(' | ')+`<br>${leg}${cOn&&st.cm?' | سربندی: <b>'+st.cm+'</b>'+(st.ct?' | '+st.ct:''):''}${st.warn?'<br><span class="err">'+st.warn+'</span>':''}${st.emp&&st.emp.length?'<br><span class="err">⚠ شیارهای خالی: '+st.emp.join('، ')+'</span>':''}`;
 }
 let cOn=false;const hid=new Set(),vis=p=>!hid.has(p);
+function clearAll(){st=null;cOn=false;hid.clear();$('map').innerHTML='';$('info').innerHTML='';$('vis').style.display='none';$('conn').style.display='none';$('cc').classList.remove('on')}
 function conn(){draw(!cOn)}
 function conn_old(){
  if(!st)draw();if(st.err)return;
@@ -229,10 +232,10 @@ function connOpts(){const sel=$('cmode'),prev=sel.value||'1',s=calc();let g=1,L=
  const O=[];L.forEach(a=>{if(a==1||a==g)O.push([String(a),a==1?'سری (۱ مسیر)':'پارالل ('+a+' مسیر)']);else{O.push([String(a),'ترکیبی سری-موازی ('+a+' مسیر، هر مسیر '+(g/a)+' گروه مجاور)']);O.push([a+':h','نیمه‌پارالل '+a+' پایه (پل‌کشی، هر مسیر '+(g/a)+' گروه هم‌فاصله)'])}});
  const v=O.some(o=>o[0]==prev)?prev:'1';
  sel.innerHTML=O.map(o=>`<option value="${o[0]}" ${o[0]==v?'selected':''}>${o[1]}</option>`).join('')}
-function ui(e){fillSlots(!!(e&&e.target&&e.target.id=='slots'));const cr=true,p3=rv('ph')=='3';$('suba').style.display=p3?'none':'';$('lblm').textContent=p3?'گام کلاف‌های هر فاز (برای هر سه فاز یکسان)':'سیم‌پیچ اصلی (گام هر کلاف)';$('custrow').style.display=cr?'':'none';$('custf').style.display=cr&&$('cust').checked?'':'none';opts();ggo();connOpts()}
+function ui(e){if(e&&e.type=='change'&&e.target&&e.target.id!='cmode')clearAll();fillSlots(!!(e&&e.target&&e.target.id=='slots'));const cr=true,p3=rv('ph')=='3';$('suba').style.display=p3?'none':'';$('lblm').textContent=p3?'گام کلاف‌های هر فاز (برای هر سه فاز یکسان)':'سیم‌پیچ اصلی (گام هر کلاف)';$('custrow').style.display=cr?'':'none';$('custf').style.display=cr&&$('cust').checked?'':'none';opts();ggo();connOpts()}
 document.querySelectorAll('input,select').forEach(e=>e.addEventListener('change',ui));
-$('draw').onclick=()=>{hid.clear();draw()};$('vis').addEventListener('change',e=>{const p=+e.target.dataset.p;if(e.target.checked)hid.delete(p);else hid.add(p);draw(cOn)});$('slotsx').addEventListener('input',()=>{curS=+$('slotsx').value||curS});$('gopts').addEventListener('change',connOpts);$('cmode').addEventListener('change',()=>{if(cOn)draw(true)});$('cc').onclick=conn;
-$('clr').onclick=()=>{st=null;cOn=false;hid.clear();$('vis').style.display='none';$('cc').classList.remove('on');$('map').innerHTML='';$('info').innerHTML='';$('conn').style.display='none'};
+$('draw').onclick=()=>{hid.clear();draw()};$('vis').addEventListener('change',e=>{const p=+e.target.dataset.p;if(e.target.checked)hid.delete(p);else hid.add(p);draw(cOn)});$('slotsx').addEventListener('input',()=>{curS=+$('slotsx').value||curS;clearAll()});$('gopts').addEventListener('change',()=>{clearAll();connOpts()});$('ggopts').addEventListener('change',()=>{clearAll();connOpts()});$('custf').addEventListener('input',clearAll);$('custf').addEventListener('click',e=>{if(e.target.tagName=='BUTTON')clearAll()});$('cmode').addEventListener('change',()=>{if(cOn)draw(true)});$('cc').onclick=conn;
+$('clr').onclick=clearAll;
 function wrap(c,t,m){const L=[];let cur='';for(const w of t.split(' ')){const x=cur?cur+' '+w:w;if(c.measureText(x).width>m&&cur){L.push(cur);cur=w}else cur=x}if(cur)L.push(cur);return L}
 function mkpdf(jpg,w,h,pw,ph){const en=new TextEncoder(),parts=[],off=[];let len=0;const add=x=>{const b=typeof x=='string'?en.encode(x):x;parts.push(b);len+=b.length};
  const obj=(n,body,s)=>{off[n]=len;add(n+' 0 obj\n'+body+'\n');if(s){add('stream\n');add(s);add('\nendstream\n')}add('endobj\n')};
@@ -277,4 +280,8 @@ function addRow(id,v){const r=document.createElement('span');r.className='cr';r.
 addRow('mrows','');addRow('arows','');
 $('madd').onclick=()=>{const l=$('mrows').lastElementChild;addRow('mrows',l?l.querySelector('input').value:'')};
 $('aadd').onclick=()=>{const l=$('arows').lastElementChild;addRow('arows',l?l.querySelector('input').value:'')};
+const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>';
+function setTheme(m){document.documentElement.setAttribute('data-theme',m);$('theme').innerHTML=m=='dark'?MOON:SUN;$('theme').title=m=='dark'?'تم تاریک':'تم روشن';try{localStorage.setItem('theme',m)}catch(_){}}
+$('theme').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')=='dark'?'light':'dark');
+{let m0='light';try{m0=localStorage.getItem('theme')||'light'}catch(_){}setTheme(m0=='dark'?'dark':'light')}
 ui();</script></body></html>
