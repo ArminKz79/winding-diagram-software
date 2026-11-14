@@ -9,7 +9,8 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 'Vazirmatn',Tahoma,system-ui,sans-serif;padding:14px}
 .wrap{max-width:1200px;margin:0 auto;position:relative}
-h1{font-size:20px;font-weight:700;margin:4px 0 16px;text-align:center}
+.hdr{position:relative;display:flex;align-items:center;justify-content:center;min-height:36px;padding:0 44px;margin:4px 0 16px}
+h1{font-size:20px;font-weight:700;margin:0;text-align:center}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .full{grid-column:1/-1}
@@ -46,12 +47,11 @@ button.sm{padding:5px 12px;border-radius:10px}
 #info:empty,#map:empty{display:none}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:4px}
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
-.theme{position:absolute;top:2px;left:0;width:36px;height:36px;padding:0;border-radius:50%;background:var(--st);color:var(--fg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex:none}
+.theme{position:absolute;top:50%;left:0;transform:translateY(-50%);width:36px;height:36px;padding:0;border-radius:50%;background:var(--st);color:var(--fg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex:none}
 .theme svg{width:20px;height:20px}
 </style></head><body>
 <main class="wrap">
-<button id="theme" class="theme" type="button" aria-label="تغییر تم"></button>
-<h1>طراحی و ترسیم دیاگرام الکتروموتور</h1>
+<div class="hdr"><h1>طراحی و ترسیم دیاگرام الکتروموتور</h1><button id="theme" class="theme" type="button" aria-label="تغییر تم"></button></div>
 <section class="card">
  <div class="grid">
   <div class="f"><label for="phs">نوع موتور</label><select id="phs"><option value="1">تک فاز</option><option value="3">سه فاز</option></select></div>
