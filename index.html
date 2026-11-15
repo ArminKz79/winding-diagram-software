@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>طراحی و ترسیم دیاگرام الکتروموتور</title>
 <style>
-:root{--bg:#f3f5fa;--fg:#161a22;--mut:#5b6577;--card:#fff;--bd:#d5dbe7;--ac:#2563eb;--st:#eaeef6;--fld:#f4f6fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-:root[data-theme="dark"]{--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}
+:root{color-scheme:light;--bg:#f3f5fa;--fg:#161a22;--mut:#5b6577;--card:#fff;--bd:#d5dbe7;--ac:#2563eb;--st:#eaeef6;--fld:#f4f6fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0b1020;--fg:#e9edf6;--mut:#9aa7c0;--card:#141b2e;--bd:#2a3550;--ac:#6ea0ff;--st:#1b2540;--fld:#0d1424}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 'Vazirmatn',Tahoma,system-ui,sans-serif;padding:14px}
 .wrap{max-width:1200px;margin:0 auto;position:relative}
@@ -42,13 +44,21 @@ button.sm{padding:5px 12px;border-radius:10px}
 #info,#conn{font-size:14px;line-height:1.9}
 #conn div{margin-bottom:8px}
 .err{color:#dc2626}
-#vis{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin-top:12px}#vis b{font-size:16px}
+#vis{margin-top:12px}#vlist{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}#vis b{font-size:16px}#vis .cset{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
 #info:empty,#map:empty{display:none}
 #info:empty,#map:empty{display:none}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:4px}
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
 .theme{position:absolute;top:50%;left:0;transform:translateY(-50%);width:36px;height:36px;padding:0;border-radius:50%;background:var(--st);color:var(--fg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex:none}
 .theme svg{width:20px;height:20px}
+.cset>summary{list-style:none;cursor:pointer;color:var(--ac);font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;padding:2px 0;user-select:none;-webkit-user-select:none}
+.cset>summary::-webkit-details-marker{display:none}
+.cset>summary::before{content:"◄";font-size:15px;transition:transform .15s}
+.cset[open]>summary::before{transform:rotate(-90deg)}
+.cbody{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.crow{display:flex;flex-wrap:wrap;gap:10px}
+.cit{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--fld);font-size:15px}
+.cit input[type=color]{width:42px;height:32px;padding:0;border:1px solid var(--bd);border-radius:8px;background:transparent;cursor:pointer}
 </style></head><body>
 <main class="wrap">
 <div class="hdr"><h1>طراحی و ترسیم دیاگرام الکتروموتور</h1><button id="theme" class="theme" type="button" aria-label="تغییر تم"></button></div>
@@ -71,7 +81,11 @@ button.sm{padding:5px 12px;border-radius:10px}
 </section>
 <section id="info" class="card"></section>
 <div id="map"></div>
-<section id="vis" class="card" style="display:none"></section>
+<section id="vis" class="card" style="display:none"><div id="vlist"></div>
+<details class="cset" id="cset"><summary>تنظیمات رنگ خطوط دیاگرام</summary>
+   <div class="cbody"><div class="crow" id="cg1"></div><div class="crow" id="cg3"></div><div><button type="button" class="sec sm" id="cdef">بازگشت به رنگ‌های پیش‌فرض</button></div></div>
+  </details>
+</section>
 <div id="conn" class="card" style="margin-top:10px;display:none"></div>
 </main>
 <script>
@@ -183,7 +197,7 @@ for(const c of coils.filter(c=>vis(c.p))){const gm=GM[c.p+','+c.k],dd=two?.13:0,
     ok.forEach(g=>{const m=(g[0]+g[1])/2;s+=`<polygon points="${m-6*dr},${yl-4.5} ${m-6*dr},${yl+4.5} ${m+6*dr},${yl}" fill="${col[l.p]}"/>`})}});
   names.forEach((n,p)=>{if(!ends[p])return;[[ends[p][0],n[0],0],[ends[p][1],n[1],1]].forEach(([i,t,e])=>{const ax=X(i),ay=ly-13;s+=`<line x1="${ax}" y1="${Y}" x2="${ax}" y2="${ly}" stroke="${col[p]}" stroke-width="1.8" stroke-linecap="round"/><polygon points="${e?`${ax-4.5},${ay-5} ${ax+4.5},${ay-5} ${ax},${ay+5}`:`${ax-4.5},${ay+5} ${ax+4.5},${ay+5} ${ax},${ay-5}`}" fill="${col[p]}"/><text x="${ax}" y="${ly+22}" text-anchor="middle" font-size="16" font-weight="bold" fill="${col[p]}">${t}</text>`})});s+=hp.join('')}
  st.h=H;st.w=W;$('map').innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Vazirmatn,Tahoma,sans-serif">`+s+'</svg>';
- $('vis').innerHTML='<b>نمایش سیم‌پیچ‌ها</b>'+nm.slice(0,ph==3?3:2).map((n,p)=>`<label class="chk"><input type="checkbox" data-p="${p}" ${hid.has(p)?'':'checked'}><span class="dot" style="background:${col[p]}"></span>${n}</label>`).join('');$('vis').style.display='';
+ $('vlist').innerHTML='<b>نمایش سیم‌پیچ‌ها</b>'+nm.slice(0,ph==3?3:2).map((n,p)=>`<label class="chk"><input type="checkbox" data-p="${p}" ${hid.has(p)?'':'checked'}><span class="dot" style="background:${col[p]}"></span>${n}</label>`).join('');$('vis').style.display='';
  const leg=nm.slice(0,ph==3?3:2).map((n,i)=>`<span class="dot" style="background:${col[i]}"></span>${n}`).join(' &nbsp; ');
  const cn=p=>coils.filter(c=>c.p==p).length,ipl=[['تعداد شیار',S],['قطب',P],['تعداد کلاف‌ها',coils.length]].concat(ph==3?[['تعداد کلاف هر فاز',cn(0)]]:[['کلاف اصلی',cn(0)+' تا'],['کلاف کمکی',cn(1)+' تا']],[['فاصله محوری',fa(Math.floor(ph==3?spp*2/3:spp/2))+' شیار']]);
  if(st.frac)ipl.push(['نوع','کسری‌شیار، دولایه']);
@@ -232,9 +246,9 @@ function connOpts(){const sel=$('cmode'),prev=sel.value||'1',s=calc();let g=1,L=
  const O=[];L.forEach(a=>{if(a==1||a==g)O.push([String(a),a==1?'سری (۱ مسیر)':'پارالل ('+a+' مسیر)']);else{O.push([String(a),'ترکیبی سری-موازی ('+a+' مسیر، هر مسیر '+(g/a)+' گروه مجاور)']);O.push([a+':h','نیمه‌پارالل '+a+' پایه (پل‌کشی، هر مسیر '+(g/a)+' گروه هم‌فاصله)'])}});
  const v=O.some(o=>o[0]==prev)?prev:'1';
  sel.innerHTML=O.map(o=>`<option value="${o[0]}" ${o[0]==v?'selected':''}>${o[1]}</option>`).join('')}
-function ui(e){if(e&&e.type=='change'&&e.target&&e.target.id!='cmode')clearAll();fillSlots(!!(e&&e.target&&e.target.id=='slots'));const cr=true,p3=rv('ph')=='3';$('suba').style.display=p3?'none':'';$('lblm').textContent=p3?'گام کلاف‌های هر فاز (برای هر سه فاز یکسان)':'سیم‌پیچ اصلی (گام هر کلاف)';$('custrow').style.display=cr?'':'none';$('custf').style.display=cr&&$('cust').checked?'':'none';opts();ggo();connOpts()}
+function ui(e){if(e&&e.type=='change'&&e.target&&e.target.id!='cmode')clearAll();fillSlots(!!(e&&e.target&&e.target.id=='slots'));const cr=true,p3=rv('ph')=='3';$('suba').style.display=p3?'none':'';$('lblm').textContent=p3?'گام کلاف‌های هر فاز (برای هر سه فاز یکسان)':'سیم‌پیچ اصلی (گام هر کلاف)';$('custrow').style.display=cr?'':'none';$('custf').style.display=cr&&$('cust').checked?'':'none';opts();ggo();connOpts();cvis()}
 document.querySelectorAll('input,select').forEach(e=>e.addEventListener('change',ui));
-$('draw').onclick=()=>{hid.clear();draw()};$('vis').addEventListener('change',e=>{const p=+e.target.dataset.p;if(e.target.checked)hid.delete(p);else hid.add(p);draw(cOn)});$('slotsx').addEventListener('input',()=>{curS=+$('slotsx').value||curS;clearAll()});$('gopts').addEventListener('change',()=>{clearAll();connOpts()});$('ggopts').addEventListener('change',()=>{clearAll();connOpts()});$('custf').addEventListener('input',clearAll);$('custf').addEventListener('click',e=>{if(e.target.tagName=='BUTTON')clearAll()});$('cmode').addEventListener('change',()=>{if(cOn)draw(true)});$('cc').onclick=conn;
+$('draw').onclick=()=>{hid.clear();draw()};$('vis').addEventListener('change',e=>{if(e.target.type!='checkbox')return;const p=+e.target.dataset.p;if(e.target.checked)hid.delete(p);else hid.add(p);draw(cOn)});$('slotsx').addEventListener('input',()=>{curS=+$('slotsx').value||curS;clearAll()});$('gopts').addEventListener('change',()=>{clearAll();connOpts()});$('ggopts').addEventListener('change',()=>{clearAll();connOpts()});$('custf').addEventListener('input',clearAll);$('custf').addEventListener('click',e=>{if(e.target.tagName=='BUTTON')clearAll()});$('cmode').addEventListener('change',()=>{if(cOn)draw(true)});$('cc').onclick=conn;
 $('clr').onclick=clearAll;
 function wrap(c,t,m){const L=[];let cur='';for(const w of t.split(' ')){const x=cur?cur+' '+w:w;if(c.measureText(x).width>m&&cur){L.push(cur);cur=w}else cur=x}if(cur)L.push(cur);return L}
 function mkpdf(jpg,w,h,pw,ph){const en=new TextEncoder(),parts=[],off=[];let len=0;const add=x=>{const b=typeof x=='string'?en.encode(x):x;parts.push(b);len+=b.length};
@@ -248,10 +262,10 @@ function mkpdf(jpg,w,h,pw,ph){const en=new TextEncoder(),parts=[],off=[];let len
  obj(5,'<< /Length '+ct.length+' >>',ct);
  const xo=len;add('xref\n0 6\n0000000000 65535 f \n'+[1,2,3,4,5].map(n=>String(off[n]).padStart(10,'0')+' 00000 n \n').join('')+'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xo+'\n%%EOF');
  return new Blob(parts,{type:'application/pdf'})}
+function saveBlob(b,n){const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000)}
 async function pdf(){
  const was=cOn;draw(true);if(st.err){draw(was);return}
- const dl=window.claude?await claude.use('downloads'):null;
- if(!dl){alert('ذخیره‌ی فایل در این نمایش ممکن نیست.');draw(was);return}
+ let dl=null;try{dl=window.claude?await claude.use('downloads'):null}catch(_){}
  try{
   try{await Promise.all([document.fonts.load('18px Vazirmatn'),document.fonts.load('bold 26px Vazirmatn')])}catch(_){}
   const{P,S,spp,coils,pitch}=st,k=Math.min(2,12000/Math.max(st.w,900));
@@ -271,17 +285,28 @@ async function pdf(){
   Lc.forEach((t,i)=>g.fillText(t,CW-20,yd+st.h+40+i*24));
   const b=atob(cv.toDataURL('image/jpeg',0.92).split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
   const blob=mkpdf(u,cv.width,cv.height,+(CW*.75).toFixed(2),+(CH*.75).toFixed(2));
-  await dl.save({filename:`winding-${P}pole-${S}slot.pdf`,data:blob});
+  const fn=`winding-${P}pole-${S}slot.pdf`;if(dl)await dl.save({filename:fn,data:blob});else saveBlob(blob,fn);
  }catch(e){if(!e||e.code!=='declined')alert('ساخت PDF ناموفق بود.')}finally{draw(was)}
 }
 $('pdf').onclick=pdf;
-(window.claude?claude.use('downloads'):Promise.resolve(null)).then(d=>{if(!d)$('pdf').style.display='none'}).catch(()=>{});
 function addRow(id,v){const r=document.createElement('span');r.className='cr';r.innerHTML='۱ به <input type="number" min="2" value="'+v+'"><button type="button" class="sec sm x">×</button>';r.querySelector('.x').onclick=()=>{if($(id).children.length>1)r.remove()};$(id).appendChild(r)}
 addRow('mrows','');addRow('arows','');
 $('madd').onclick=()=>{const l=$('mrows').lastElementChild;addRow('mrows',l?l.querySelector('input').value:'')};
 $('aadd').onclick=()=>{const l=$('arows').lastElementChild;addRow('arows',l?l.querySelector('input').value:'')};
 const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>';
-function setTheme(m){document.documentElement.setAttribute('data-theme',m);$('theme').innerHTML=m=='dark'?MOON:SUN;$('theme').title=m=='dark'?'تم تاریک':'تم روشن';try{localStorage.setItem('theme',m)}catch(_){}}
-$('theme').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')=='dark'?'light':'dark');
-{let m0='light';try{m0=localStorage.getItem('theme')||'light'}catch(_){}setTheme(m0=='dark'?'dark':'light')}
+const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null,TK='theme-pref';
+const sysTheme=()=>MQ&&MQ.matches?'dark':'light';
+const savedTheme=()=>{try{const v=localStorage.getItem(TK);return v=='dark'||v=='light'?v:null}catch(_){return null}};
+function applyTheme(m){document.documentElement.setAttribute('data-theme',m);$('theme').innerHTML=m=='dark'?MOON:SUN;$('theme').title=m=='dark'?'تم تاریک':'تم روشن'}
+$('theme').onclick=()=>{const m=document.documentElement.getAttribute('data-theme')=='dark'?'light':'dark';applyTheme(m);try{localStorage.setItem(TK,m)}catch(_){}};
+if(MQ){const f=()=>{if(!savedTheme())applyTheme(sysTheme())};if(MQ.addEventListener)MQ.addEventListener('change',f);else if(MQ.addListener)MQ.addListener(f)}
+applyTheme(savedTheme()||sysTheme());
+const DEF1=C1.slice(),DEF3=C3.slice(),CK='diag-colors',HX=/^#[0-9a-f]{6}$/i;
+function saveCols(){try{localStorage.setItem(CK,JSON.stringify({c1:C1,c3:C3}))}catch(_){}}
+function buildCols(){[['cg1',C1,N1],['cg3',C3,N3]].forEach(([id,a,n])=>{$(id).innerHTML=n.map((t,i)=>`<label class="cit">${t}<input type="color" data-g="${id}" data-i="${i}" value="${a[i]}"></label>`).join('')})}
+function cvis(){const p3=rv('ph')=='3';$('cg1').style.display=p3?'none':'';$('cg3').style.display=p3?'':'none'}
+$('cset').addEventListener('input',e=>{const t=e.target;if(t.type!='color')return;(t.dataset.g=='cg1'?C1:C3)[+t.dataset.i]=t.value;saveCols();if(st&&!st.err)draw(cOn)});
+$('cdef').onclick=()=>{DEF1.forEach((c,i)=>C1[i]=c);DEF3.forEach((c,i)=>C3[i]=c);saveCols();buildCols();if(st&&!st.err)draw(cOn)};
+try{const o=JSON.parse(localStorage.getItem(CK)||'null');if(o){(o.c1||[]).forEach((c,i)=>{if(i<C1.length&&HX.test(c))C1[i]=c});(o.c3||[]).forEach((c,i)=>{if(i<C3.length&&HX.test(c))C3[i]=c})}}catch(_){}
+buildCols();
 ui();</script></body></html>
