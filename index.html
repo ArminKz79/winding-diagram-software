@@ -28,6 +28,9 @@ input[type=checkbox],input[type=radio]{width:18px;height:18px;accent-color:var(-
 #gopts label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--fld);cursor:pointer}
 #ggopts label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--fld);cursor:pointer}
 #gopts label:has(input:checked){border-color:var(--ac)}
+#gopts.r3{grid-template-columns:repeat(3,minmax(0,1fr))}
+#gopts.r3 label{min-width:0;padding:10px 8px;gap:6px;white-space:nowrap}
+@media (max-width:380px){#gopts.r3{gap:6px}#gopts.r3 label{padding:10px 6px;gap:5px;font-size:15px}#gopts.r3 input{width:16px;height:16px;flex:none}}
 #ggopts label:has(input:checked){border-color:var(--ac)}
 .sub{border:1px solid var(--bd);border-radius:12px;padding:10px 12px;background:var(--fld);margin-bottom:8px}
 .sub>label{display:block;font-size:16px;font-weight:700;color:var(--fg);margin-bottom:8px}
@@ -239,6 +242,7 @@ function opts(){const one=rv('ph')=='1',two=rv('ly')=='2',prev=gv();
  const L=one?[['d21','بیشتر'],['d11','مساوی'],['d12','کمتر']]:two?[['f','گام کامل'],['p23','2/3 گام کامل'],['p45','4/5 گام کامل'],['p56','5/6 گام کامل'],['p67','6/7 گام کامل']]:[['f','گام کامل'],['r','گام کوتاه']];
  const cur=L.some(o=>o[0]==prev)?prev:L[0][0];
  $('optbox').style.display='';$('gtitle').textContent=one?'نسبت تعداد کلاف‌های اصلی به کمکی':'گام سیم‌پیچ';
+ $('gopts').classList.toggle('r3',one);
  $('gopts').innerHTML=L.map(o=>`<label><input type="radio" name="gp" value="${o[0]}" ${o[0]==cur?'checked':''}> ${o[1]}</label>`).join('')}
 const gcd=(u,v)=>v?gcd(v,u%v):u;
 function connOpts(){const sel=$('cmode'),prev=sel.value||'1',s=calc();let g=1,L=[1];
