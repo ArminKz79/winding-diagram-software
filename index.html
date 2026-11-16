@@ -44,6 +44,10 @@ button.sm{padding:5px 12px;border-radius:10px}
 .btns button{flex:1 1 130px}
 #map{overflow-x:auto;direction:ltr;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:8px 0}
 #map svg{display:block;margin:0 auto}
+.zb{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 8px}
+.zb button{padding:4px 10px;min-width:38px;font-size:14px;line-height:1.6;border-radius:10px;flex:none}
+.zb #zin,.zb #zout{font-size:18px;line-height:1.3}
+.zb #zl{min-width:44px;text-align:center;font-size:15px;font-weight:700;color:var(--fg)}
 #info,#conn{font-size:14px;line-height:1.9}
 #conn>b{font-size:17px}
 .f>label:not(.chk)::after,.sub>label::after,#vlist>b::after,#conn>b::after{content:":"}
@@ -86,6 +90,7 @@ button.sm{padding:5px 12px;border-radius:10px}
  <div class="btns"><button id="draw">رسم نقشه</button><button id="cc" class="out">اتصال کلاف‌ها</button><button id="clr" class="sec">پاک کردن</button><button id="pdf" class="sec">خروجی PDF</button></div>
 </section>
 <section id="info" class="card"></section>
+<div id="zb" class="zb" style="display:none"><button type="button" class="out" id="zout" aria-label="کوچک‌نمایی">−</button><span id="zl">۱۰۰٪</span><button type="button" class="out" id="zin" aria-label="بزرگ‌نمایی">+</button><button type="button" class="out" id="zfit">متناسب با عرض</button><button type="button" class="out" id="z11">1:1</button></div>
 <div id="map"></div>
 <section id="vis" class="card" style="display:none"><div id="vlist"></div>
 <details class="cset" id="cset"><summary>تنظیمات رنگ خطوط دیاگرام</summary>
@@ -99,7 +104,7 @@ const $=id=>document.getElementById(id),RPM=[3000,1500,1000,750,600,500,375,300,
 $('rpm').innerHTML=RPM.map(r=>`<option value="${r}" ${r==1500?'selected':''}>${r} دور (${6000/r} قطب)</option>`).join('');
 const rv=n=>n=='ph'?$('phs').value:n=='ly'?($('wt').value[0]=='2'?'2':'1'):document.querySelector(`[name=${n}]:checked`).value;
 const C1=['#ef4444','#3b82f6'],C3=['#ef4444','#22c55e','#3b82f6'],N1=['اصلی (U)','کمکی (Z)'],N3=['فاز اول (U)','فاز دوم (V)','فاز سوم (W)'];
-let st=null;
+let st=null,zfit=true,zv=1;
 function fracCalc(S,P,ph){
  const m=ph==3?3:2,w=360/(2*m),PH=ph==3?[0,2,1,0,2,1]:[0,1,0,1],SG=ph==3?[1,-1,1,-1,1,-1]:[1,1,-1,-1];
  const sl=[],cnt={};
@@ -160,7 +165,7 @@ function calc(){
 }
 function draw(L){
  st=calc();$('vis').style.display='none';cOn=!!L;$('cc').classList.toggle('on',cOn);$('conn').style.display='none';
- if(st.err){$('info').innerHTML=`<span class="err">${st.err}</span>`;$('map').innerHTML='';return}
+ if(st.err){$('info').innerHTML=`<span class="err">${st.err}</span>`;$('map').innerHTML='';$('zb').style.display='none';return}
  const{P,S,ph,two,spp,q,m,pitch,coils}=st,sw=38,M=(()=>{let n=0;coils.forEach(c=>{if(c.b<c.a){const sp=(c.b-c.a+S)%S;n=Math.max(n,sw*(sp/2-c.b-.5),sw*(c.a+sp/2+.5-S))}});return Math.max(24,Math.ceil(n)+10)})(),W=S*sw+2*M,cy=175,col=ph==3?C3:C1,nm=ph==3?N3:N1;let H=215;
  let s='';
  const X=i=>M+i*sw+sw/2;
@@ -202,7 +207,7 @@ for(const c of coils.filter(c=>vis(c.p))){const gm=GM[c.p+','+c.k],dd=two?.13:0,
     let ok=sg.filter(g=>g[1]-g[0]>=40);if(!ok.length){const best=sg.slice().sort((u,v)=>(v[1]-v[0])-(u[1]-u[0]))[0];if(best&&best[1]-best[0]>=24)ok=[best]}
     ok.forEach(g=>{const m=(g[0]+g[1])/2;s+=`<polygon points="${m-6*dr},${yl-4.5} ${m-6*dr},${yl+4.5} ${m+6*dr},${yl}" fill="${col[l.p]}"/>`})}});
   names.forEach((n,p)=>{if(!ends[p])return;[[ends[p][0],n[0],0],[ends[p][1],n[1],1]].forEach(([i,t,e])=>{const ax=X(i),ay=ly-13;s+=`<line x1="${ax}" y1="${Y}" x2="${ax}" y2="${ly}" stroke="${col[p]}" stroke-width="1.8" stroke-linecap="round"/><polygon points="${e?`${ax-4.5},${ay-5} ${ax+4.5},${ay-5} ${ax},${ay+5}`:`${ax-4.5},${ay+5} ${ax+4.5},${ay+5} ${ax},${ay-5}`}" fill="${col[p]}"/><text x="${ax}" y="${ly+22}" text-anchor="middle" font-size="16" font-weight="bold" fill="${col[p]}">${t}</text>`})});s+=hp.join('')}
- st.h=H;st.w=W;$('map').innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Vazirmatn,Tahoma,sans-serif">`+s+'</svg>';
+ st.h=H;st.w=W;$('map').innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Vazirmatn,Tahoma,sans-serif">`+s+'</svg>';$('zb').style.display='flex';zoomApply();
  $('vlist').innerHTML='<b>نمایش سیم‌پیچ‌ها</b>'+nm.slice(0,ph==3?3:2).map((n,p)=>`<label class="chk"><input type="checkbox" data-p="${p}" ${hid.has(p)?'':'checked'}><span class="dot" style="background:${col[p]}"></span>${n}</label>`).join('');$('vis').style.display='';
  const leg=nm.slice(0,ph==3?3:2).map((n,i)=>`<span class="dot" style="background:${col[i]}"></span>${n}`).join(' &nbsp; ');
  const cn=p=>coils.filter(c=>c.p==p).length,ipl=[['تعداد شیار',S],['قطب',P],['تعداد کلاف‌ها',coils.length]].concat(ph==3?[['تعداد کلاف هر فاز',cn(0)]]:[['کلاف اصلی',cn(0)+' تا'],['کلاف کمکی',cn(1)+' تا']],[['فاصله محوری',fa(Math.floor(ph==3?spp*2/3:spp/2))+' شیار']]);
@@ -213,7 +218,7 @@ for(const c of coils.filter(c=>vis(c.p))){const gm=GM[c.p+','+c.k],dd=two?.13:0,
  $('info').innerHTML=ipl.map(([l,v])=>l+': <b>'+v+'</b>').join(' | ')+`<br>${leg}${cOn&&st.cm?' | سربندی: <b>'+st.cm+'</b>'+(st.ct?' | '+st.ct:''):''}${st.warn?'<br><span class="err">'+st.warn+'</span>':''}${st.emp&&st.emp.length?'<br><span class="err">⚠ شیارهای خالی: '+st.emp.join('، ')+'</span>':''}`;
 }
 let cOn=false;const hid=new Set(),vis=p=>!hid.has(p);
-function clearAll(){st=null;cOn=false;hid.clear();$('map').innerHTML='';$('info').innerHTML='';$('vis').style.display='none';$('conn').style.display='none';$('cc').classList.remove('on')}
+function clearAll(){st=null;zfit=true;$('zb').style.display='none';cOn=false;hid.clear();$('map').innerHTML='';$('info').innerHTML='';$('vis').style.display='none';$('conn').style.display='none';$('cc').classList.remove('on')}
 function conn(){draw(!cOn)}
 function conn_old(){
  if(!st)draw();if(st.err)return;
@@ -277,7 +282,7 @@ async function pdf(){
  try{
   try{await Promise.all([document.fonts.load('18px Vazirmatn'),document.fonts.load('bold 26px Vazirmatn')])}catch(_){}
   const{P,S,spp,coils,pitch}=st,k=Math.min(2,12000/Math.max(st.w,900));
-  const svg=$('map').innerHTML.replace(/var\(--st\)/g,'#eef0f3').replace(/var\(--bd\)/g,'#999').replace(/var\(--fg\)/g,'#000');
+  const svg=$('map').innerHTML.replace(/^(<svg[^>]*?)\sstyle=\"[^\"]*\"/,'$1').replace(/var\(--st\)/g,'#eef0f3').replace(/var\(--bd\)/g,'#999').replace(/var\(--fg\)/g,'#000');
   const img=new Image();await new Promise((r,j)=>{img.onload=r;img.onerror=j;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
   const W=st.w,CW=Math.max(W,900),cv=document.createElement('canvas'),c=cv.getContext('2d');
   const info=st.ip;
@@ -320,4 +325,11 @@ $('cset').addEventListener('input',e=>{const t=e.target;if(t.type!='color')retur
 $('cdef').onclick=()=>{DEF1.forEach((c,i)=>C1[i]=c);DEF3.forEach((c,i)=>C3[i]=c);saveCols();buildCols();if(st&&!st.err)draw(cOn)};
 try{const o=JSON.parse(localStorage.getItem(CK)||'null');if(o){(o.c1||[]).forEach((c,i)=>{if(i<C1.length&&HX.test(c))C1[i]=c});(o.c3||[]).forEach((c,i)=>{if(i<C3.length&&HX.test(c))C3[i]=c})}}catch(_){}
 buildCols();
+const ZMIN=.05,ZMAX=4;
+function curZ(){return zfit?Math.min(1,Math.max(ZMIN,($('map').clientWidth-8)/st.w)):zv}
+function zoomApply(){const sv=$('map').querySelector('svg');if(!sv||!st||st.err)return;const z=curZ();sv.style.width=st.w*z+'px';sv.style.height=st.h*z+'px';$('zl').textContent=Math.round(z*100).toLocaleString('fa-IR')+'٪'}
+function zoomBy(f){if(!st||st.err)return;zv=Math.min(ZMAX,Math.max(ZMIN,curZ()*f));zfit=false;zoomApply()}
+$('zin').onclick=()=>zoomBy(1.25);$('zout').onclick=()=>zoomBy(.8);
+$('zfit').onclick=()=>{zfit=true;zoomApply()};$('z11').onclick=()=>{zfit=false;zv=1;zoomApply()};
+addEventListener('resize',()=>{if(zfit)zoomApply()});
 ui();</script></body></html>
