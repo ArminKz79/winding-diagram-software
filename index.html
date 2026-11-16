@@ -270,6 +270,7 @@ function mkpdf(jpg,w,h,pw,ph){const en=new TextEncoder(),parts=[],off=[];let len
  return new Blob(parts,{type:'application/pdf'})}
 function saveBlob(b,n){const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000)}
 async function pdf(){
+ if(!st||st.err||!$('map').innerHTML){$('info').innerHTML='<span class="err">نقشه‌ای رسم نشده است.</span>';return}
  const was=cOn;draw(true);if(st.err){draw(was);return}
  let dl=null;try{dl=window.claude?await claude.use('downloads'):null}catch(_){}
  try{
