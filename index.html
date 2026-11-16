@@ -294,13 +294,16 @@ addRow('mrows','');addRow('arows','');
 $('madd').onclick=()=>{const l=$('mrows').lastElementChild;addRow('mrows',l?l.querySelector('input').value:'')};
 $('aadd').onclick=()=>{const l=$('arows').lastElementChild;addRow('arows',l?l.querySelector('input').value:'')};
 const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>';
-const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null,TK='theme-pref';
+const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+let ovr=null;
 const sysTheme=()=>MQ&&MQ.matches?'dark':'light';
-const savedTheme=()=>{try{const v=localStorage.getItem(TK);return v=='dark'||v=='light'?v:null}catch(_){return null}};
 function applyTheme(m){document.documentElement.setAttribute('data-theme',m);$('theme').innerHTML=m=='dark'?MOON:SUN;$('theme').title=m=='dark'?'تم تاریک':'تم روشن'}
-$('theme').onclick=()=>{const m=document.documentElement.getAttribute('data-theme')=='dark'?'light':'dark';applyTheme(m);try{localStorage.setItem(TK,m)}catch(_){}};
-if(MQ){const f=()=>{if(!savedTheme())applyTheme(sysTheme())};if(MQ.addEventListener)MQ.addEventListener('change',f);else if(MQ.addListener)MQ.addListener(f)}
-applyTheme(savedTheme()||sysTheme());
+function syncTheme(){ovr=null;applyTheme(sysTheme())}
+$('theme').onclick=()=>{ovr=document.documentElement.getAttribute('data-theme')=='dark'?'light':'dark';applyTheme(ovr)};
+if(MQ){if(MQ.addEventListener)MQ.addEventListener('change',syncTheme);else if(MQ.addListener)MQ.addListener(syncTheme)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!ovr)applyTheme(sysTheme())});
+addEventListener('pageshow',()=>{if(!ovr)applyTheme(sysTheme())});
+applyTheme(sysTheme());
 const DEF1=C1.slice(),DEF3=C3.slice(),CK='diag-colors',HX=/^#[0-9a-f]{6}$/i;
 function saveCols(){try{localStorage.setItem(CK,JSON.stringify({c1:C1,c3:C3}))}catch(_){}}
 function buildCols(){[['cg1',C1,N1],['cg3',C3,N3]].forEach(([id,a,n])=>{$(id).innerHTML=n.map((t,i)=>`<label class="cit">${t}<input type="color" data-g="${id}" data-i="${i}" value="${a[i]}"></label>`).join('')})}
